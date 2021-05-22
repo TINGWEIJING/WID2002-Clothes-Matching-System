@@ -17,6 +17,12 @@ py -m pip install -r requirements.txt
 pip freeze > requirements.txt
 ```
 
+## Run the Program
+```python
+cd src
+python script.py -b pants.jpg -t black.jpg,yellow.jpg,blue.jpg 
+```
+
 ## Learning
 - [Colour Detection using Pandas & OpenCV](https://data-flair.training/blogs/project-in-python-colour-detection/)
 - [OpenCV with Tkinter](https://www.pyimagesearch.com/2016/05/23/opencv-with-tkinter/)
