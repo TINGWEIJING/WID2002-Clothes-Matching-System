@@ -16,3 +16,7 @@ py -m pip install -r requirements.txt
 ```Shell
 pip freeze > requirements.txt
 ```
+
+## Learning
+- [Colour Detection using Pandas & OpenCV](https://data-flair.training/blogs/project-in-python-colour-detection/)
+- [OpenCV with Tkinter](https://www.pyimagesearch.com/2016/05/23/opencv-with-tkinter/)
