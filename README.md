@@ -16,3 +16,11 @@ py -m pip install -r requirements.txt
 ```Shell
 pip freeze > requirements.txt
 ```
+
+## Learning
+- [Colour Detection using Pandas & OpenCV](https://data-flair.training/blogs/project-in-python-colour-detection/)
+- [OpenCV with Tkinter](https://www.pyimagesearch.com/2016/05/23/opencv-with-tkinter/)
+- [Real Python Tkinter Tutorial](https://realpython.com/python-gui-tkinter/)
+- [Tkinter Module](https://docs.python.org/3/library/tkinter.html)
+- [Tkinter Tutorial](https://tkdocs.com/tutorial/index.html)
+- [Color Quantization using K-Means](https://scikit-learn.org/stable/auto_examples/cluster/plot_color_quantization.html)
