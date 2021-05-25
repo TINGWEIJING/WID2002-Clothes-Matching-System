@@ -23,6 +23,25 @@ colour_name = []
 index=["color","color_name","hex","R","G","B"]
 csv = pd.read_csv('colors.csv', names=index, header=None)
 
+# Resize an image according to the diminishFactor
+def diminish(img, diminishFactor : int):
+    row, col, temp = img.shape
+    b_plane = img[:,:,0]
+    g_plane = img[:,:,1]
+    r_plane = img[:,:,2]
+
+    # Calculate the size of the resized image
+    resized_b_plane = b_plane[1::diminishFactor,1::diminishFactor]
+    resized_g_plane = g_plane[1::diminishFactor,1::diminishFactor]
+    resized_r_plane = r_plane[1::diminishFactor,1::diminishFactor]
+
+    resized_img = np.zeros((row//diminishFactor, col//diminishFactor, temp),np.uint8)
+    resized_img[:,:,0] = resized_b_plane
+    resized_img[:,:,1] = resized_g_plane
+    resized_img[:,:,2] = resized_r_plane
+    return resized_img
+
+
 # Calculate minimum distance from all colours and get the most matching color
 def getColorName(R,G,B):
     minimum = 1e9
@@ -56,10 +75,7 @@ def displayMostSuitableTop(idx : int, img_path : list):
     # Read the image and rescale it to 70%
     cv2.destroyAllWindows()
     img = cv2.imread(img_path[idx])
-    width = int(img.shape[1] * 70 / 100)
-    height = int(img.shape[0] * 70 / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    img = diminish(img, 2)
 
     # Set the window name and display the image
     windowName = "Match"
@@ -85,10 +101,7 @@ for i in range(len(img_path)):
 
     # Read and rescale the image
     img = cv2.imread(img_path[i])
-    width = int(img.shape[1] * 70 / 100)
-    height = int(img.shape[0] * 70 / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    img = diminish(img, 2)
 
     windowName = ""
 
