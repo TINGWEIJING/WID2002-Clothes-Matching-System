@@ -23,7 +23,7 @@ colour_name = []
 index=["color","color_name","hex","R","G","B"]
 csv = pd.read_csv('colors.csv', names=index, header=None)
 
-# Resize an image to 50% of it's original size
+# Resize an image according to the diminishFactor
 def diminish(img, diminishFactor : int):
     row, col, temp = img.shape
     b_plane = img[:,:,0]
