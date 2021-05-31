@@ -8,21 +8,22 @@ from sklearn.utils import shuffle
 from time import time
 from PIL import Image
 
-n_colors = 2
+n_colors = 5
 
 # Load the Summer Palace photo
 # china = load_sample_image("china.jpg")
-china = Image.open(r'src\yellow.jpg')
+china = Image.open(r'src\Orange shirt.jpg')
 
 # Convert to floats instead of the default 8 bits integer coding. Dividing by
 # 255 is important so that pl.imshow behaves works well on foat data (need to
 # be in the range [0-1]
 china = np.array(china, dtype=np.float64) / 255
-
+print(china.shape)
 # Load Image and transform to a 2D numpy array.
 w, h, d = original_shape = tuple(china.shape)
 assert d == 3
 image_array = np.reshape(china, (w * h, d))
+print(image_array.shape)
 
 print("Fitting estimator on a small sub-sample of the data")
 t0 = time()
@@ -39,12 +40,12 @@ print(kmeans.cluster_centers_)
 print("done in %0.3fs." % (time() - t0))
 
 
-codebook_random = shuffle(image_array, random_state=0)[:n_colors + 1]
-print("Predicting color indices on the full image (random)")
-t0 = time()
-dist = euclidean_distances(codebook_random, image_array, squared=True)
-labels_random = dist.argmin(axis=0)
-print("done in %0.3fs." % (time() - t0))
+# codebook_random = shuffle(image_array, random_state=0)[:n_colors + 1]
+# print("Predicting color indices on the full image (random)")
+# t0 = time()
+# dist = euclidean_distances(codebook_random, image_array, squared=True)
+# labels_random = dist.argmin(axis=0)
+# print("done in %0.3fs." % (time() - t0))
 
 
 def recreate_image(codebook, labels, w, h):
