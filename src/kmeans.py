@@ -1,43 +1,79 @@
+import os
 import numpy as np
-import pylab as pl
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.metrics import euclidean_distances
-from sklearn.datasets import load_sample_image
-from sklearn.utils import shuffle
-from time import time
-from PIL import Image
+from matplotlib import pyplot
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib as mpl
 
-n_colors = 2
 
-def perform_Kmeans(image):
-    # Convert to floats instead of the default 8 bits integer coding. Dividing by
-    # 255 is important so that pl.imshow behaves works well on foat data (need to
-    # be in the range [0-1]
+
+# Number of cluster and iterations, larger K = longer time
+K = 16
+max_iters = 1
+
+# Get the nearest centroids
+def findClosestCentroids(X, centroids):
+    # Set K
+    K = centroids.shape[0]
+    idx = np.zeros(X.shape[0], dtype=int)
+
+    for i in range(idx.size):
+        J = np.sum(np.square(X[i] - centroids), axis=1)
+        idx[i] = np.argmin(J)
+
+    return idx
+
+# Compute the centroids
+def computeCentroids(X, idx, K):
+    m, n = X.shape
+    centroids = np.zeros((K, n))
+    for i in range(K):
+        centroids[i] = np.mean(X[idx == i], axis=0) 
+    return centroids
+
+# Randomize the centroids
+def kMeansInitCentroids(X, K):
+    m, n = X.shape
+    centroids = np.zeros((K, n))
+
+    randidx = np.random.permutation(X.shape[0])
+    centroids = X[randidx[:K], :]
+
+    return centroids
+
+def runkMeans(X, centroids, findClosestCentroids, computeCentroids,
+              max_iters=10, plot_progress=False):
+
+    K = centroids.shape[0]
+    idx = None
+
+
+    for i in range(max_iters):
+        idx = findClosestCentroids(X, centroids)
+        centroids = computeCentroids(X, idx, K)
+
+    return centroids, idx
+
+
+
+def perform(image):
+
     image = np.array(image, dtype=np.float64) / 255
-    w, h, d = original_shape = tuple(image.shape)
-    assert d == 3
 
-    image_array = np.reshape(image, (w * h, d))
+    # Reshape the image into an Nx3 matrix where N = number of pixels.
+    # Each row will contain the Red, Green and Blue pixel values
+    # This gives us our dataset matrix X that we will use K-Means on.
+    X = image.reshape(-1, 3)
 
-    # Fitting estimator on a small sub-sample of the data
-    image_array_sample = shuffle(image_array, random_state=0)[:1000]
-    kmeans = KMeans(n_clusters=n_colors, random_state=0).fit(image_array_sample)
+    # Randomly initialise the centroids position
+    initial_centroids = kMeansInitCentroids(X, K)
 
-    # Get label for all points
-    labels = kmeans.predict(image_array)
+    # Run K-Means
+    centroids, idx = runkMeans(X, initial_centroids,
+                                    findClosestCentroids,
+                                    computeCentroids,
+                                    max_iters)
 
-    # Return the image after k-means clustering
-    return recreate_image(kmeans.cluster_centers_, labels, w, h)
 
-
-def recreate_image(codebook, labels, w, h):
-    """Recreate the (compressed) image from the code book & labels"""
-    d = codebook.shape[1]
-    image = np.zeros((w, h, d))
-    label_idx = 0
-    for i in range(w):
-        for j in range(h):
-            image[i][j] = codebook[labels[label_idx]]
-            label_idx += 1
-    return image
+    # Reshape the recovered image into proper dimensions and convert to uint8
+    X_recovered = centroids[idx, :].reshape(image.shape)
+    return np.array(np.dot(X_recovered, 255), dtype=np.uint8)

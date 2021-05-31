@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import argparse
-import kmeansimp as km
+import kmeans as km
 import matplotlib as mpl
 from PIL import Image
 
@@ -92,7 +92,10 @@ def displayMostSuitableTop(idx : int, img_path : list):
     img = np.array(Image.open(img_path[idx]))
     img = NN_interpolation(img,img.shape[0]//5,img.shape[1]//5)
     img = Image.fromarray(img.astype('uint8')).convert('RGB')
-
+    
+    # Convert back to openCV2 format
+    img = np.array(img) 
+    img = img[:, :, ::-1].copy() 
 
     # Set the window name and display the image
     windowName = "Match"
@@ -129,7 +132,8 @@ for i in range(len(img_path)):
     img = img[:, :, ::-1].copy() 
     
     # Compress the image colour using K-means algorithm
-    # img = km.perform(img)
+    print("Performing K-Mean Clustering on Image {}".format(i+1))
+    img = km.perform(img)
 
     windowName = ""
 
@@ -173,8 +177,8 @@ for i in range(len(img_path)):
             cv2.destroyAllWindows()
             break
 
-print(colour_codes)
-print(colour_name)
+print("The colour code for each cloth is", colour_codes)
+print("The colour name for each cloth is", colour_name)
 idx = getClosestMatch(colour_codes)
 # print("The closest match for your pants is {}-th shirt, with the colour of {}".format(idx+1, colours[idx]
 print("The most suitable colour to match with your pants is", colour_name[idx])
