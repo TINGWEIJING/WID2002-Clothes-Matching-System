@@ -1,4 +1,5 @@
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_iris.html
+from numpy.core.fromnumeric import resize
 import pandas as pd
 from PIL import Image
 from PIL import ImageTk
@@ -6,13 +7,9 @@ import tkinter as tk
 import logging
 import cv2
 import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.metrics import euclidean_distances
-from sklearn.datasets import load_sample_image
-from sklearn.utils import shuffle
-from time import time
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 class ImageObject:
     def __init__(self, cv_img) -> None:
@@ -22,13 +19,52 @@ class ImageObject:
         self.tk_img_id = None
         self.rank = 0
 
-    def get_resized_tk_img(h:int, w:int):
-        pass
+    def get_tk_thumbnail(self):
+        resize_tk_img = ImageMatching.cv2tkimg(self.__class__.resize(self.cv_img))
+        return resize_tk_img
 
     def __del__(self):
         self.cv_img = None
         self.tk_img = None
         self.tk_img_id = None
+
+    def __eq__(self, other: 'ImageObject'):
+        return self.rank == other.rank
+
+    def __lt__(self, other: 'ImageObject'):
+        return self.rank < other.rank
+
+    def __le__(self, other: 'ImageObject'):
+        return self.rank <= other.rank
+
+    def __gt__(self, other: 'ImageObject'):
+        return self.rank > other.rank
+
+    def __ge__(self, other: 'ImageObject'):
+        return self.rank >= other.rank
+
+    @classmethod
+    def resize(cls, cv_img, dst_h: int = 100, dst_w: int = 100):
+        '''Using NN interpolation to resize'''
+        # TODO: use vectorization implementation
+
+        src_H, src_W, channels = cv_img.shape
+        ratio = 0
+        if(src_H > src_W):
+            ratio = src_H/dst_h
+            dst_w = int(src_W / ratio)
+        else:
+            ratio = src_W/dst_w
+            dst_h = int(src_H / ratio)
+
+        resize_img = np.zeros((dst_h, dst_w, channels), dtype=np.uint8)
+        for i in range(dst_h):
+            for j in range(dst_w):
+                scrx = round(i*ratio)
+                scry = round(j*ratio)
+                # print(f"x:{scrx}, y:{scry}")
+                resize_img[i, j] = cv_img[scrx, scry]
+        return resize_img
 
 
 class ImageMatching:
@@ -43,6 +79,7 @@ class ImageMatching:
 
         self._source_image = None
         self._target_images = []
+        self._target_thumbnails = []
         self._n_highlight_color = 3
 
     def set_source_image(self, filename: str, can_image: tk.Canvas):
@@ -68,7 +105,7 @@ class ImageMatching:
             logging.info('Removed images from canvas')
 
         if scroll_frame:
-            
+
             for i, widget in enumerate(scroll_frame.winfo_children()):
                 scroll_frame.grid_rowconfigure(i, weight=0, minsize=0)
                 widget.destroy()
@@ -82,10 +119,12 @@ class ImageMatching:
         scroll_frame.grid_columnconfigure(0, weight=0, minsize=100)
         for i in range(len(filenames)):
             scroll_frame.grid_rowconfigure(i, weight=0, minsize=100)
-            tk.Label(master=scroll_frame, image=self._target_images[i].tk_img).grid(column=0, row=i, padx=2, pady=2, sticky="nsew")
+            new_thumbnail = self._target_images[i].get_tk_thumbnail()
+            new_label = tk.Label(master=scroll_frame, image=new_thumbnail)
+            new_label.grid(column=0, row=i, padx=2, pady=2, sticky="nsew")
+            self._target_thumbnails.append(new_thumbnail)
 
         logging.info('Added new images to scroll frame')
-
 
     @classmethod
     def cv2tkimg(cls, cvImage):

@@ -7,6 +7,7 @@ from PIL import ImageTk
 import cv2
 from functools import partial
 from utils import ImageMatching
+import numpy as np
 
 # =================================================================
 # Global variables
@@ -51,6 +52,19 @@ color_chart_win = None
 # Event methods
 # -----------------------------------------------------------------
 
+def generate_color_tk_img(r:int, g:int, b:int):
+    size = 80
+    new_img = np.zeros((size, size, 3), dtype=np.uint8)
+    red_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(r)
+    green_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(g)
+    blue_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(b)
+    new_img[:,:,0] = blue_narr
+    new_img[:,:,1] = green_narr
+    new_img[:,:,2] = red_narr
+
+    print(new_img.shape)
+    
+
 def open_select_source_image(can_image:tk.Canvas):
     filetypes = (
         ('Image file', '*.jpg;*.png'),
@@ -63,6 +77,9 @@ def open_select_source_image(can_image:tk.Canvas):
 
     if len(filename) > 0 and can_image:
         CLOTH_MATCHING.set_source_image(filename=filename, can_image=can_image)
+
+def analyse(scroll_frame:tk.Frame):
+    pass
 
 def open_select_matching_images(can_image:tk.Canvas, scroll_frame:tk.Frame):
     filetypes = (
@@ -272,6 +289,7 @@ tk.Label(master=SCROLL_FRAME_PALLET.scrollwindow, text='Pallet').grid(column=0, 
 
 # Commands
 BT_OPEN_IMAGE_1.configure(command=partial(open_select_source_image, CAN_IMAGE_1))
+BT_ANALYSE.configure(command=partial(analyse, SCROLL_FRAME_PALLET.scrollwindow))
 BT_OPEN_IMAGE_LIST.configure(command=partial(open_select_matching_images, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow))
 
 
