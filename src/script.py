@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import pandas as pd
 import argparse
+import kmeans as km
 
 #Creating argument parser to take image path from command line
 ap = argparse.ArgumentParser()
@@ -102,6 +103,9 @@ for i in range(len(img_path)):
     # Read and rescale the image
     img = cv2.imread(img_path[i])
     img = diminish(img, 2)
+    
+    # Compress the image colour using K-means algorithm
+    img = km.perform_Kmeans(img)
 
     windowName = ""
 
