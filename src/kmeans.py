@@ -7,7 +7,7 @@ import matplotlib as mpl
 
 
 # Number of cluster and iterations, larger K = longer time
-K = 16
+K = 10
 max_iters = 1
 
 # Get the nearest centroids
@@ -40,8 +40,7 @@ def kMeansInitCentroids(X, K):
 
     return centroids
 
-def runkMeans(X, centroids, findClosestCentroids, computeCentroids,
-              max_iters=10, plot_progress=False):
+def runkMeans(X, centroids, max_iters=10):
 
     K = centroids.shape[0]
     idx = None
@@ -68,12 +67,18 @@ def perform(image):
     initial_centroids = kMeansInitCentroids(X, K)
 
     # Run K-Means
-    centroids, idx = runkMeans(X, initial_centroids,
-                                    findClosestCentroids,
-                                    computeCentroids,
-                                    max_iters)
-
+    centroids, idx = runkMeans(X, initial_centroids, max_iters)
 
     # Reshape the recovered image into proper dimensions and convert to uint8
     X_recovered = centroids[idx, :].reshape(image.shape)
-    return np.array(np.dot(X_recovered, 255), dtype=np.uint8)
+
+    # Return the centroids and the clusted image
+    # centroids = centroids[np.logical_not(np.isnan(centroids))]
+    to_be_deleted = []
+    for i in range(len(centroids)):
+        for element in centroids[i]:
+            if np.isnan(element):
+                to_be_deleted.append(i)
+                break
+    centroids = np.delete(centroids, to_be_deleted, 0)
+    return np.array(np.dot(centroids, 255), dtype=np.uint8), np.array(np.dot(X_recovered, 255), dtype=np.uint8)

@@ -134,7 +134,7 @@ for i in range(len(img_path)):
     
     # Compress the image colour using K-means algorithm
     print("Performing K-Mean Clustering on Image {}".format(i+1))
-    img = km.perform(img)
+    _, img = km.perform(img)
 
     windowName = ""
 
