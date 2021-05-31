@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 import pandas as pd
 import argparse
-import kmeans as km
+import kmeansimp as km
+import matplotlib as mpl
+from PIL import Image
 
 #Creating argument parser to take image path from command line
 ap = argparse.ArgumentParser()
@@ -43,6 +45,17 @@ def diminish(img, diminishFactor : int):
     return resized_img
 
 
+# Resize an image using Nearest Neighbour Interpolation
+def NN_interpolation(img,dstH,dstW):
+    scrH,scrW,_=img.shape
+    retimg=np.zeros((dstH,dstW,3),dtype=np.uint8)
+    for i in range(dstH-1):
+        for j in range(dstW-1):
+            scrx=round(i*(scrH/dstH))
+            scry=round(j*(scrW/dstW))
+            retimg[i,j]=img[scrx,scry]
+    return retimg
+
 # Calculate minimum distance from all colours and get the most matching color
 def getColorName(R,G,B):
     minimum = 1e9
@@ -75,8 +88,11 @@ def getClosestMatch(colour_codes : list):
 def displayMostSuitableTop(idx : int, img_path : list):
     # Read the image and rescale it to 70%
     cv2.destroyAllWindows()
-    img = cv2.imread(img_path[idx])
-    img = diminish(img, 2)
+
+    img = np.array(Image.open(img_path[idx]))
+    img = NN_interpolation(img,img.shape[0]//5,img.shape[1]//5)
+    img = Image.fromarray(img.astype('uint8')).convert('RGB')
+
 
     # Set the window name and display the image
     windowName = "Match"
@@ -101,11 +117,19 @@ for i in range(len(img_path)):
     clicked = False
 
     # Read and rescale the image
-    img = cv2.imread(img_path[i])
-    img = diminish(img, 2)
+    # img = mpl.image.imread(img_path[i]) # img = cv2.imread(img_path[i])
+    
+    # Read and rescale the image
+    img = np.array(Image.open(img_path[i]))
+    img = NN_interpolation(img,img.shape[0]//5,img.shape[1]//5)
+    img = Image.fromarray(img.astype('uint8')).convert('RGB')
+
+    # Convert back to openCV2 format
+    img = np.array(img) 
+    img = img[:, :, ::-1].copy() 
     
     # Compress the image colour using K-means algorithm
-    img = km.perform_Kmeans(img)
+    # img = km.perform(img)
 
     windowName = ""
 
