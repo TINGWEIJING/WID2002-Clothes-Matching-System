@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import pandas as pd
 import argparse
+import kmeans as km
+import matplotlib as mpl
+from PIL import Image
 
 #Creating argument parser to take image path from command line
 ap = argparse.ArgumentParser()
@@ -42,6 +45,17 @@ def diminish(img, diminishFactor : int):
     return resized_img
 
 
+# Resize an image using Nearest Neighbour Interpolation
+def NN_interpolation(img,dstH,dstW):
+    scrH,scrW,_=img.shape
+    retimg=np.zeros((dstH,dstW,3),dtype=np.uint8)
+    for i in range(dstH-1):
+        for j in range(dstW-1):
+            scrx=round(i*(scrH/dstH))
+            scry=round(j*(scrW/dstW))
+            retimg[i,j]=img[scrx,scry]
+    return retimg
+
 # Calculate minimum distance from all colours and get the most matching color
 def getColorName(R,G,B):
     minimum = 1e9
@@ -74,8 +88,16 @@ def getClosestMatch(colour_codes : list):
 def displayMostSuitableTop(idx : int, img_path : list):
     # Read the image and rescale it to 70%
     cv2.destroyAllWindows()
-    img = cv2.imread(img_path[idx])
-    img = diminish(img, 2)
+
+    img = np.array(Image.open(img_path[idx]))
+    max_width = max([img.shape[0]//5, 500])
+    max_height = max([img.shape[1]//5, 500])
+    img = NN_interpolation(img,max_width, max_height)
+    img = Image.fromarray(img.astype('uint8')).convert('RGB')
+    
+    # Convert back to openCV2 format
+    img = np.array(img) 
+    img = img[:, :, ::-1].copy() 
 
     # Set the window name and display the image
     windowName = "Match"
@@ -98,10 +120,21 @@ def displayMostSuitableTop(idx : int, img_path : list):
 for i in range(len(img_path)):
     b, g, r = 0,0,0
     clicked = False
-
+    
     # Read and rescale the image
-    img = cv2.imread(img_path[i])
-    img = diminish(img, 2)
+    img = np.array(Image.open(img_path[i]))
+    max_width = max([img.shape[0]//5, 500])
+    max_height = max([img.shape[1]//5, 500])
+    img = NN_interpolation(img,max_width, max_height)
+    img = Image.fromarray(img.astype('uint8')).convert('RGB')
+
+    # Convert back to openCV2 format
+    img = np.array(img) 
+    img = img[:, :, ::-1].copy() 
+    
+    # Compress the image colour using K-means algorithm
+    print("Performing K-Mean Clustering on Image {}".format(i+1))
+    _, img = km.perform(img)
 
     windowName = ""
 
@@ -145,9 +178,9 @@ for i in range(len(img_path)):
             cv2.destroyAllWindows()
             break
 
-print(colour_codes)
-print(colour_name)
+print("The colour code for each cloth is", colour_codes)
+print("The colour name for each cloth is", colour_name)
 idx = getClosestMatch(colour_codes)
-# print("The closest match for your pants is {}-th shirt, with the colour of {}".format(idx+1, colours[idx]
 print("The most suitable colour to match with your pants is", colour_name[idx])
+print("CTRL - C on the terminal or press ESC on the image to exit the program.")
 displayMostSuitableTop(idx, img_path)
