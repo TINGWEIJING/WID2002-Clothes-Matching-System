@@ -90,7 +90,9 @@ def displayMostSuitableTop(idx : int, img_path : list):
     cv2.destroyAllWindows()
 
     img = np.array(Image.open(img_path[idx]))
-    img = NN_interpolation(img,img.shape[0]//5,img.shape[1]//5)
+    max_width = max([img.shape[0]//5, 500])
+    max_height = max([img.shape[1]//5, 500])
+    img = NN_interpolation(img,max_width, max_height)
     img = Image.fromarray(img.astype('uint8')).convert('RGB')
     
     # Convert back to openCV2 format
@@ -118,13 +120,12 @@ def displayMostSuitableTop(idx : int, img_path : list):
 for i in range(len(img_path)):
     b, g, r = 0,0,0
     clicked = False
-
-    # Read and rescale the image
-    # img = mpl.image.imread(img_path[i]) # img = cv2.imread(img_path[i])
     
     # Read and rescale the image
     img = np.array(Image.open(img_path[i]))
-    img = NN_interpolation(img,img.shape[0]//5,img.shape[1]//5)
+    max_width = max([img.shape[0]//5, 500])
+    max_height = max([img.shape[1]//5, 500])
+    img = NN_interpolation(img,max_width, max_height)
     img = Image.fromarray(img.astype('uint8')).convert('RGB')
 
     # Convert back to openCV2 format
@@ -180,6 +181,6 @@ for i in range(len(img_path)):
 print("The colour code for each cloth is", colour_codes)
 print("The colour name for each cloth is", colour_name)
 idx = getClosestMatch(colour_codes)
-# print("The closest match for your pants is {}-th shirt, with the colour of {}".format(idx+1, colours[idx]
 print("The most suitable colour to match with your pants is", colour_name[idx])
+print("CTRL - C on the terminal or press ESC on the image to exit the program.")
 displayMostSuitableTop(idx, img_path)
