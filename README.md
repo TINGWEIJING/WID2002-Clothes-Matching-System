@@ -31,3 +31,5 @@ python script.py -b pants.jpg -t black.jpg,yellow.jpg,blue.jpg
 - [Tkinter Tutorial](https://tkdocs.com/tutorial/index.html)
 - https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html
 - [Color Quantization using K-Means](https://scikit-learn.org/stable/auto_examples/cluster/plot_color_quantization.html)
+- [Python implementation of nearest neighbor interpolation algorithm](https://www.programmersought.com/article/36124682709/)
+- [Nearest Neighbor Interpolation ](https://www.imageeprocessing.com/2017/11/nearest-neighbor-interpolation.html)

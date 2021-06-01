@@ -6,9 +6,13 @@ import matplotlib as mpl
 
 
 
+
 # Number of cluster and iterations, larger K = longer time
 K = 10
 max_iters = 1
+
+# ignore the warning when divide by NaN
+np.seterr(divide='ignore', invalid='ignore')
 
 # Get the nearest centroids
 def findClosestCentroids(X, centroids):
