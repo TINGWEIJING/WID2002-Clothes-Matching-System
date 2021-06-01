@@ -56,25 +56,20 @@ class ImageObject:
     @classmethod
     def resize(cls, cv_img, dst_h: int = 100, dst_w: int = 100):
         '''Using NN interpolation to resize'''
-        # TODO: use vectorization implementation
 
         src_H, src_W, channels = cv_img.shape
-        ratio = 0
-        if(src_H > src_W):
-            ratio = src_H/dst_h
-            dst_w = int(src_W / ratio)
-        else:
-            ratio = src_W/dst_w
-            dst_h = int(src_H / ratio)
+        old_size =  cv_img.shape
+        row_ratio, col_ratio, _ = np.array([dst_h, dst_w,3])/np.array(old_size)
+        
+        print(row_ratio, col_ratio)
+        # row wise interpolation 
+        row_idx = (np.ceil(range(1, 1 + int(src_H*row_ratio))/row_ratio) - 1).astype(int)
+        # column wise interpolation
+        col_idx = (np.ceil(range(1, 1 + int(src_W*col_ratio))/col_ratio) - 1).astype(int)
 
-        resize_img = np.zeros((dst_h, dst_w, channels), dtype=np.uint8)
-        for i in range(dst_h):
-            for j in range(dst_w):
-                scrx = round(i*ratio)
-                scry = round(j*ratio)
-                # print(f"x:{scrx}, y:{scry}")
-                resize_img[i, j] = cv_img[scrx, scry]
-        return resize_img
+        final_matrix = cv_img[:, col_idx][row_idx, :]
+        print(final_matrix.shape)
+        return final_matrix
 
 
 class ImageMatching:

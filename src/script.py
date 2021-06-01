@@ -56,6 +56,21 @@ def NN_interpolation(img,dstH,dstW):
             retimg[i,j]=img[scrx,scry]
     return retimg
 
+def nn_interpolate(A, new_size):
+    """Vectorized Nearest Neighbor Interpolation"""
+    old_size = A.shape
+    row_ratio, col_ratio, _ = np.array(new_size)/np.array(old_size)
+
+    # row wise interpolation 
+    row_idx = (np.ceil(range(1, 1 + int(old_size[0]*row_ratio))/row_ratio) - 1).astype(int)
+
+    # column wise interpolation
+    col_idx = (np.ceil(range(1, 1 + int(old_size[1]*col_ratio))/col_ratio) - 1).astype(int)
+
+    final_matrix = A[:, col_idx][row_idx, :]
+
+    return final_matrix
+
 # Calculate minimum distance from all colours and get the most matching color
 def getColorName(R,G,B):
     minimum = 1e9
@@ -92,7 +107,7 @@ def displayMostSuitableTop(idx : int, img_path : list):
     img = np.array(Image.open(img_path[idx]))
     max_width = max([img.shape[0]//5, 500])
     max_height = max([img.shape[1]//5, 500])
-    img = NN_interpolation(img,max_width, max_height)
+    img = nn_interpolate(img,(max_width, max_height,3))
     img = Image.fromarray(img.astype('uint8')).convert('RGB')
     
     # Convert back to openCV2 format
@@ -125,7 +140,7 @@ for i in range(len(img_path)):
     img = np.array(Image.open(img_path[i]))
     max_width = max([img.shape[0]//5, 500])
     max_height = max([img.shape[1]//5, 500])
-    img = NN_interpolation(img,max_width, max_height)
+    img = nn_interpolate(img,(max_width, max_height,3))
     img = Image.fromarray(img.astype('uint8')).convert('RGB')
 
     # Convert back to openCV2 format
