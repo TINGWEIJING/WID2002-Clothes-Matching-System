@@ -52,20 +52,8 @@ color_chart_win = None
 # Event methods
 # -----------------------------------------------------------------
 
-def generate_color_tk_img(r:int, g:int, b:int):
-    size = 80
-    new_img = np.zeros((size, size, 3), dtype=np.uint8)
-    red_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(r)
-    green_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(g)
-    blue_narr = np.zeros((size, size, 1), dtype=np.uint8).fill(b)
-    new_img[:,:,0] = blue_narr
-    new_img[:,:,1] = green_narr
-    new_img[:,:,2] = red_narr
 
-    print(new_img.shape)
-    
-
-def open_select_source_image(can_image:tk.Canvas):
+def open_select_source_image(can_image: tk.Canvas):
     filetypes = (
         ('Image file', '*.jpg;*.png'),
     )
@@ -78,10 +66,15 @@ def open_select_source_image(can_image:tk.Canvas):
     if len(filename) > 0 and can_image:
         CLOTH_MATCHING.set_source_image(filename=filename, can_image=can_image)
 
-def analyse(scroll_frame:tk.Frame):
-    pass
 
-def open_select_matching_images(can_image:tk.Canvas, scroll_frame:tk.Frame):
+def analyse(scroll_frame: tk.Frame):
+    CLOTH_MATCHING.generate_color_pallets(scroll_frame=scroll_frame)
+
+
+def match(can_image: tk.Canvas, scroll_frame: tk.Frame):
+    CLOTH_MATCHING.generate_matching_results(can_image=can_image, scroll_frame=scroll_frame)
+
+def open_select_matching_images(can_image: tk.Canvas, scroll_frame: tk.Frame):
     filetypes = (
         ('Image file', '*.jpg;*.png'),
     )
@@ -159,6 +152,7 @@ tk.Label(master=root, text='Pallet').grid(column=0, row=8, columnspan=GRID_COL_N
 # Special class
 # -----------------------------------------------------------------
 
+
 class ScrolledWindow(tk.Frame):
     """
     https://stackoverflow.com/questions/16188420/tkinter-scrollbar-for-frame
@@ -197,7 +191,7 @@ class ScrolledWindow(tk.Frame):
         self.canv = tk.Canvas(self.parent)
         self.canv.config(relief='flat',
                          width=10,
-                         heigh=10, bd=2)
+                         heigh=10, bd=0)
         # placing a canvas into frame
         self.canv.grid(column=0, row=0, sticky='nsew')
         # accociating scrollbar comands to canvas scroling
@@ -271,25 +265,33 @@ CAN_IMAGE_2.grid(column=2, row=1, columnspan=2, rowspan=7, padx=PADDING, pady=PA
 
 # Image list
 FRAME_LIST = tk.Frame(master=root, width=10, height=10, background='white')
-FRAME_LIST.grid(column=4, row=1, columnspan=1, rowspan=7, padx=PADDING, pady=PADDING, sticky="nsew")
+FRAME_LIST.grid(column=4, row=1, columnspan=1, rowspan=7, padx=0, pady=0, sticky="nsew")
 FRAME_LIST.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
 FRAME_LIST.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
-SCROLL_FRAME_LIST = ScrolledWindow(parent=FRAME_LIST, canv_h=400)
+FRAME_LIST.grid_columnconfigure(1, weight=0, minsize=0)
+FRAME_LIST.grid_rowconfigure(1, weight=0, minsize=0)
+SCROLL_FRAME_LIST = ScrolledWindow(parent=FRAME_LIST, canv_h=80)
 SCROLL_FRAME_LIST.grid(row=0, column=0, sticky='EW')
-tk.Label(master=SCROLL_FRAME_LIST.scrollwindow, text='Image List').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=PADDING, pady=PADDING, sticky="nsew")
+tk.Label(master=SCROLL_FRAME_LIST.scrollwindow, text='Image List').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
 
 # Pallets
 FRAME_PALLET = tk.Frame(master=root, width=10, height=10, background='white')
-FRAME_PALLET.grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=PADDING, pady=PADDING, sticky="nsew")
+FRAME_PALLET.grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
 FRAME_PALLET.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
 FRAME_PALLET.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
-SCROLL_FRAME_PALLET = ScrolledWindow(parent=FRAME_PALLET, canv_h=400)
+FRAME_PALLET.grid_columnconfigure(1, weight=0, minsize=0)
+FRAME_PALLET.grid_rowconfigure(1, weight=0, minsize=0)
+FRAME_PALLET.configure(background='white')
+SCROLL_FRAME_PALLET = ScrolledWindow(parent=FRAME_PALLET, canv_h=80)
 SCROLL_FRAME_PALLET.grid(row=0, column=0, sticky='EW')
-tk.Label(master=SCROLL_FRAME_PALLET.scrollwindow, text='Pallet').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=PADDING, pady=PADDING, sticky="nsew")
+SCROLL_FRAME_PALLET.configure(background='white')
+tk.Label(master=SCROLL_FRAME_PALLET.scrollwindow, text='Pallet').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
+SCROLL_FRAME_PALLET.scrollwindow.configure(background='grey')
 
 # Commands
 BT_OPEN_IMAGE_1.configure(command=partial(open_select_source_image, CAN_IMAGE_1))
 BT_ANALYSE.configure(command=partial(analyse, SCROLL_FRAME_PALLET.scrollwindow))
+BT_MATCH.configure(command=partial(match, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow))
 BT_OPEN_IMAGE_LIST.configure(command=partial(open_select_matching_images, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow))
 
 

@@ -1,4 +1,5 @@
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_iris.html
+from functools import partial
 from numpy.core.fromnumeric import resize
 import pandas as pd
 from PIL import Image
@@ -7,6 +8,7 @@ import tkinter as tk
 import logging
 import cv2
 import numpy as np
+import kmeans
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -15,9 +17,17 @@ class ImageObject:
     def __init__(self, cv_img) -> None:
         '''Create an instance that store all required image data'''
         self.cv_img = cv_img
-        self.tk_img = ImageMatching.cv2tkimg(cv_img)
+        self.tk_img = self.get_resize_tk_img(400, 400)
         self.tk_img_id = None
         self.rank = 0
+
+    def get_resize_cv_img(self, h: int, w: int):
+        resize_cv_img = self.__class__.resize(self.cv_img, h, w)
+        return resize_cv_img
+
+    def get_resize_tk_img(self, h: int, w: int):
+        resize_tk_img = ImageMatching.cv2tkimg(self.__class__.resize(self.cv_img, h, w))
+        return resize_tk_img
 
     def get_tk_thumbnail(self):
         resize_tk_img = ImageMatching.cv2tkimg(self.__class__.resize(self.cv_img))
@@ -80,6 +90,8 @@ class ImageMatching:
         self._source_image = None
         self._target_images = []
         self._target_thumbnails = []
+        self._color_checkbox_vars = {}
+        self._color_pallets = []
         self._n_highlight_color = 3
 
     def set_source_image(self, filename: str, can_image: tk.Canvas):
@@ -100,12 +112,16 @@ class ImageMatching:
     def set_target_images(self, filenames: list, can_image: tk.Canvas, scroll_frame: tk.Frame):
         '''Set target matching images'''
 
+        def display_tk_image(img):
+            can_image.delete("all")
+            can_image.create_image(0, 0, image=img, anchor=tk.NW)
+            logging.info('Changed image in canvas')
+
         if can_image:
             can_image.delete("all")
             logging.info('Removed images from canvas')
 
         if scroll_frame:
-
             for i, widget in enumerate(scroll_frame.winfo_children()):
                 scroll_frame.grid_rowconfigure(i, weight=0, minsize=0)
                 widget.destroy()
@@ -120,11 +136,85 @@ class ImageMatching:
         for i in range(len(filenames)):
             scroll_frame.grid_rowconfigure(i, weight=0, minsize=100)
             new_thumbnail = self._target_images[i].get_tk_thumbnail()
-            new_label = tk.Label(master=scroll_frame, image=new_thumbnail)
-            new_label.grid(column=0, row=i, padx=2, pady=2, sticky="nsew")
+            new_button = tk.Button(master=scroll_frame, image=new_thumbnail, command=partial(display_tk_image, self._target_images[i].tk_img))
+            new_button.grid(column=0, row=i, padx=0, pady=0, sticky="nsew")
             self._target_thumbnails.append(new_thumbnail)
 
         logging.info('Added new images to scroll frame')
+
+    def generate_color_pallets(self, scroll_frame: tk.Frame):
+        if self._source_image is None:
+            return
+
+        if scroll_frame:
+            for i, widget in enumerate(scroll_frame.winfo_children()):
+                scroll_frame.grid_columnconfigure(i, weight=0, minsize=0)
+                widget.destroy()
+            self._color_checkbox_vars.clear()
+            self._color_checkbox_vars = {}
+            self._color_pallets.clear()
+            self._color_pallets = []
+            logging.info('Removed color pallets from scroll frame')
+
+        highlight_color, _ = kmeans.perform(self._source_image.get_resize_cv_img(200, 200))
+
+        # TODO: get close color and remove duplicate color
+        highlight_color = list(set([tuple(x) for x in highlight_color]))
+
+        for x in highlight_color:
+            b, g, r = x
+            new_tk_img = self.generate_color_tk_img(r, g, b)
+            self._color_pallets.append(new_tk_img)
+            logging.info('Detected color: ' + str(x))
+
+        scroll_frame.grid_rowconfigure(0, weight=0, minsize=50)
+        for i in range(len(self._color_pallets)):
+            scroll_frame.grid_columnconfigure(i, weight=0, minsize=80)
+            new_var = tk.IntVar()
+            new_checkbox = tk.Checkbutton(master=scroll_frame, image=self._color_pallets[i], compound='right', variable=new_var, background='black')
+            new_checkbox.select()
+            new_checkbox.grid(column=i, row=0, padx=2, pady=2, sticky="nsew")
+            self._color_checkbox_vars[highlight_color[i]] = new_var
+
+        logging.info('Generated color pallets to scroll frame')
+
+    def generate_matching_results(self, can_image: tk.Canvas, scroll_frame: tk.Frame):
+        '''
+        1. kmeans for each image list
+        2. check selected color
+        3. compute matching rate
+        4. sort the each image list
+        5. update image list frame
+        6. update display frame
+        '''
+        def display_tk_image(img):
+            can_image.delete("all")
+            can_image.create_image(0, 0, image=img, anchor=tk.NW)
+            logging.info('Changed image in canvas')
+
+        # 1
+
+        # 2
+        for rgb, var in self._color_checkbox_vars.items():
+            if(var.get() == 1):
+                print(rgb)
+
+        # 3
+        # 4
+        for i in range(len(self._target_images)):
+            self._target_images[i].rank = len(self._target_images) - i
+
+        sorted_idx = [i[0] for i in sorted(enumerate(self._target_images), key=lambda x:x[1])]
+
+        # 5 & 6
+        for i, widget in enumerate(scroll_frame.winfo_children()):
+            widget.destroy()
+
+        for i, idx in enumerate(sorted_idx):
+            new_button = tk.Button(master=scroll_frame, image=self._target_thumbnails[idx], command=partial(display_tk_image, self._target_images[idx].tk_img))
+            new_button.grid(column=0, row=i, padx=0, pady=0, sticky="nsew")
+
+        logging.info('Rearranged images in scroll frame')
 
     @classmethod
     def cv2tkimg(cls, cvImage):
@@ -139,6 +229,16 @@ class ImageMatching:
     @classmethod
     def hex2rgb(cls, hexcode: str) -> tuple:
         return tuple(map(ord, hexcode[1:].decode('hex')))
+
+    @classmethod
+    def generate_color_tk_img(cls, r: int, g: int, b: int):
+        size = 50
+        new_img = np.zeros((size, size, 3), dtype=np.uint8)
+        new_img[:, :, 0].fill(b)
+        new_img[:, :, 1].fill(g)
+        new_img[:, :, 2].fill(r)
+        tk_img = ImageMatching.cv2tkimg(new_img)
+        return tk_img
 
     @classmethod
     def read_colors_csv(cls):
