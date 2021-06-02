@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter.constants import W
 import pandas as pd
 import os
 from PIL import Image
@@ -21,8 +22,8 @@ E_WIDTH = 140
 E_HEIGHT = 40
 # Main windows settings
 ZOOM_FACTOR = 1.4
-WIN_WIDTH = int(E_WIDTH * GRID_COL_NUM)
-WIN_HEIGHT = int(E_HEIGHT * GRID_ROW_NUM)
+WIN_WIDTH = int((E_WIDTH + PADDING) * GRID_COL_NUM + PADDING)
+WIN_HEIGHT = int((E_HEIGHT + PADDING) * GRID_ROW_NUM + PADDING)
 WIN_TITLE = 'Cloths Matching'
 COLORS_CSV_FILE = r'src/colors.csv'
 COLOR_2_RGB_DICT = {}
@@ -53,7 +54,7 @@ color_chart_win = None
 # -----------------------------------------------------------------
 
 
-def open_select_source_image(can_image: tk.Canvas):
+def open_select_source_image(can_image: tk.Canvas, scroll_frame: tk.Frame):
     filetypes = (
         ('Image file', '*.jpg;*.png'),
     )
@@ -64,17 +65,17 @@ def open_select_source_image(can_image: tk.Canvas):
         filetypes=filetypes)
 
     if len(filename) > 0 and can_image:
-        CLOTH_MATCHING.set_source_image(filename=filename, can_image=can_image)
+        CLOTH_MATCHING.set_source_image(filename=filename, can_image=can_image, scroll_frame=scroll_frame)
 
 
 def analyse(scroll_frame: tk.Frame):
-    CLOTH_MATCHING.generate_color_pallets(scroll_frame=scroll_frame)
+    CLOTH_MATCHING.generate_source_color_pallets(scroll_frame=scroll_frame)
 
 
-def match(can_image: tk.Canvas, scroll_frame: tk.Frame):
-    CLOTH_MATCHING.generate_matching_results(can_image=can_image, scroll_frame=scroll_frame)
+def match(can_image: tk.Canvas, scroll_frame: tk.Frame, palette_frame: tk.Frame):
+    CLOTH_MATCHING.generate_matching_results(can_image=can_image, scroll_frame=scroll_frame, palette_frame=palette_frame)
 
-def open_select_matching_images(can_image: tk.Canvas, scroll_frame: tk.Frame):
+def open_select_matching_images(can_image: tk.Canvas, scroll_frame: tk.Frame, palette_frame: tk.Frame):
     filetypes = (
         ('Image file', '*.jpg;*.png'),
     )
@@ -85,7 +86,7 @@ def open_select_matching_images(can_image: tk.Canvas, scroll_frame: tk.Frame):
         filetypes=filetypes)
 
     if len(filenames) > 0 and scroll_frame and can_image:
-        CLOTH_MATCHING.set_target_images(filenames=filenames, can_image=can_image, scroll_frame=scroll_frame)
+        CLOTH_MATCHING.set_target_images(filenames=filenames, can_image=can_image, scroll_frame=scroll_frame, palette_frame=palette_frame)
 
 
 def open_color_chart():
@@ -265,34 +266,51 @@ CAN_IMAGE_2.grid(column=2, row=1, columnspan=2, rowspan=7, padx=PADDING, pady=PA
 
 # Image list
 FRAME_LIST = tk.Frame(master=root, width=10, height=10, background='white')
-FRAME_LIST.grid(column=4, row=1, columnspan=1, rowspan=7, padx=0, pady=0, sticky="nsew")
-FRAME_LIST.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
+FRAME_LIST.grid(column=4, row=1, columnspan=1, rowspan=7, padx=PADDING, pady=PADDING, sticky="nsew")
+FRAME_LIST.grid_columnconfigure(0, weight=1, minsize=100)
 FRAME_LIST.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
 FRAME_LIST.grid_columnconfigure(1, weight=0, minsize=0)
 FRAME_LIST.grid_rowconfigure(1, weight=0, minsize=0)
+FRAME_LIST.grid_propagate(0)
 SCROLL_FRAME_LIST = ScrolledWindow(parent=FRAME_LIST, canv_h=80)
 SCROLL_FRAME_LIST.grid(row=0, column=0, sticky='EW')
-tk.Label(master=SCROLL_FRAME_LIST.scrollwindow, text='Image List').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
+tk.Label(master=SCROLL_FRAME_LIST.scrollwindow, text='Image List').grid(column=0, row=0, columnspan=1, rowspan=1, padx=0, pady=0, sticky="nsew")
 
-# Pallets
-FRAME_PALLET = tk.Frame(master=root, width=10, height=10, background='white')
-FRAME_PALLET.grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
-FRAME_PALLET.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
-FRAME_PALLET.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
-FRAME_PALLET.grid_columnconfigure(1, weight=0, minsize=0)
-FRAME_PALLET.grid_rowconfigure(1, weight=0, minsize=0)
-FRAME_PALLET.configure(background='white')
-SCROLL_FRAME_PALLET = ScrolledWindow(parent=FRAME_PALLET, canv_h=80)
-SCROLL_FRAME_PALLET.grid(row=0, column=0, sticky='EW')
-SCROLL_FRAME_PALLET.configure(background='white')
-tk.Label(master=SCROLL_FRAME_PALLET.scrollwindow, text='Pallet').grid(column=0, row=8, columnspan=GRID_COL_NUM, rowspan=2, padx=0, pady=0, sticky="nsew")
-SCROLL_FRAME_PALLET.scrollwindow.configure(background='grey')
+# Pallets 1
+FRAME_PALLET_1 = tk.Frame(master=root, width=10, height=10, background='white')
+FRAME_PALLET_1.grid(column=0, row=8, columnspan=3, rowspan=2, padx=PADDING, pady=PADDING, sticky="nsew")
+FRAME_PALLET_1.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
+FRAME_PALLET_1.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
+FRAME_PALLET_1.grid_columnconfigure(1, weight=0, minsize=0)
+FRAME_PALLET_1.grid_rowconfigure(1, weight=0, minsize=0)
+FRAME_PALLET_1.configure(background='white')
+FRAME_PALLET_1.grid_propagate(0)
+SCROLL_FRAME_PALLET_1 = ScrolledWindow(parent=FRAME_PALLET_1, canv_h=80)
+SCROLL_FRAME_PALLET_1.grid(row=0, column=0, sticky='EW')
+SCROLL_FRAME_PALLET_1.configure(background='white')
+tk.Label(master=SCROLL_FRAME_PALLET_1.scrollwindow, text='Pallet').grid(column=0, row=0, columnspan=1, rowspan=1, padx=0, pady=0, sticky="nsew")
+SCROLL_FRAME_PALLET_1.scrollwindow.configure(background='grey')
+
+# Pallets 2
+FRAME_PALLET_2 = tk.Frame(master=root, width=10, height=10, background='white')
+FRAME_PALLET_2.grid(column=3, row=8, columnspan=2, rowspan=2, padx=PADDING, pady=PADDING, sticky="nsew")
+FRAME_PALLET_2.grid_columnconfigure(0, weight=1, minsize=E_WIDTH)
+FRAME_PALLET_2.grid_rowconfigure(0, weight=1, minsize=E_HEIGHT)
+FRAME_PALLET_2.grid_columnconfigure(1, weight=0, minsize=0)
+FRAME_PALLET_2.grid_rowconfigure(1, weight=0, minsize=0)
+FRAME_PALLET_2.configure(background='white')
+FRAME_PALLET_2.grid_propagate(0)
+SCROLL_FRAME_PALLET_2 = ScrolledWindow(parent=FRAME_PALLET_2, canv_h=80, canv_w=80)
+SCROLL_FRAME_PALLET_2.grid(row=0, column=0, sticky='EW')
+SCROLL_FRAME_PALLET_2.configure(background='white')
+tk.Label(master=SCROLL_FRAME_PALLET_2.scrollwindow, text='Pallet').grid(column=0, row=0, columnspan=1, rowspan=1, padx=0, pady=0, sticky="nsew")
+SCROLL_FRAME_PALLET_2.scrollwindow.configure(background='blue', width=80)
 
 # Commands
-BT_OPEN_IMAGE_1.configure(command=partial(open_select_source_image, CAN_IMAGE_1))
-BT_ANALYSE.configure(command=partial(analyse, SCROLL_FRAME_PALLET.scrollwindow))
-BT_MATCH.configure(command=partial(match, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow))
-BT_OPEN_IMAGE_LIST.configure(command=partial(open_select_matching_images, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow))
+BT_OPEN_IMAGE_1.configure(command=partial(open_select_source_image, CAN_IMAGE_1, SCROLL_FRAME_PALLET_1.scrollwindow))
+BT_ANALYSE.configure(command=partial(analyse, SCROLL_FRAME_PALLET_1.scrollwindow))
+BT_MATCH.configure(command=partial(match, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow, SCROLL_FRAME_PALLET_2.scrollwindow))
+BT_OPEN_IMAGE_LIST.configure(command=partial(open_select_matching_images, CAN_IMAGE_2, SCROLL_FRAME_LIST.scrollwindow, SCROLL_FRAME_PALLET_2.scrollwindow))
 
 
 # =================================================================
