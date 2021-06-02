@@ -1,4 +1,16 @@
 # WID2002-Clothes-Matching-System
+## Screenshot
+![GUI](doc/GUI.png)
+
+## Usage Instructions
+1. Click `Import Image 1` button to import a source image
+2. Click `Analyze` button to generate important colours from the image
+3. Select the most important colour (the radio button)
+4. Click `Import Matching Images` button to import a list of target matching images
+5. Wait for few seconds
+6. Click every image on the right side and select the most important colour for each image
+7. Click `Match` to get the result, images on the right side will be sorted according to the best match
+
 ## Installation
 - Create venv with the name venv
 ```Shell
@@ -18,9 +30,9 @@ pip freeze > requirements.txt
 ```
 
 ## Run the Program
-```python
-cd src
-python script.py -b pants.jpg -t black.jpg,yellow.jpg,blue.jpg 
+- Run application
+```Shell
+py ./src/gui_main.py
 ```
 
 ## Learning

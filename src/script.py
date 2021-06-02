@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import argparse
 import kmeans as km
-import matplotlib as mpl
 from PIL import Image
 
 #Creating argument parser to take image path from command line

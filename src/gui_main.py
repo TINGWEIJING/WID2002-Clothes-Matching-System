@@ -1,14 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter.constants import W
-import pandas as pd
 import os
-from PIL import Image
-from PIL import ImageTk
-import cv2
 from functools import partial
 from utils import ImageMatching
-import numpy as np
 
 # =================================================================
 # Global variables

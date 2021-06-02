@@ -1,6 +1,5 @@
 # https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_iris.html
 from functools import partial
-from numpy.core.fromnumeric import resize
 import pandas as pd
 from PIL import Image
 from PIL import ImageTk
