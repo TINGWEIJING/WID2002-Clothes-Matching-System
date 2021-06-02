@@ -26,35 +26,6 @@ colour_name = []
 index=["color","color_name","hex","R","G","B"]
 csv = pd.read_csv('colors.csv', names=index, header=None)
 
-# Resize an image according to the diminishFactor
-def diminish(img, diminishFactor : int):
-    row, col, temp = img.shape
-    b_plane = img[:,:,0]
-    g_plane = img[:,:,1]
-    r_plane = img[:,:,2]
-
-    # Calculate the size of the resized image
-    resized_b_plane = b_plane[1::diminishFactor,1::diminishFactor]
-    resized_g_plane = g_plane[1::diminishFactor,1::diminishFactor]
-    resized_r_plane = r_plane[1::diminishFactor,1::diminishFactor]
-
-    resized_img = np.zeros((row//diminishFactor, col//diminishFactor, temp),np.uint8)
-    resized_img[:,:,0] = resized_b_plane
-    resized_img[:,:,1] = resized_g_plane
-    resized_img[:,:,2] = resized_r_plane
-    return resized_img
-
-
-# Resize an image using Nearest Neighbour Interpolation
-def NN_interpolation(img,dstH,dstW):
-    scrH,scrW,_=img.shape
-    retimg=np.zeros((dstH,dstW,3),dtype=np.uint8)
-    for i in range(dstH-1):
-        for j in range(dstW-1):
-            scrx=round(i*(scrH/dstH))
-            scry=round(j*(scrW/dstW))
-            retimg[i,j]=img[scrx,scry]
-    return retimg
 
 def nn_interpolate(A, new_size):
     """Vectorized Nearest Neighbor Interpolation"""
