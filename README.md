@@ -35,6 +35,20 @@ pip freeze > requirements.txt
 py ./src/gui_main.py
 ```
 
+## Contributors
+| Name             | Matric Number |
+| ---------------- | ------------- |
+| Ng Jing Yan      | 17205274_1    |
+| Ting Wei Jing    | 17205876_1    |
+| Lee Cheng Hui    | 17204205_1    |
+| Soh Zhi Chen     | 17204929_1    |
+| Lim Jian Xhee    | 17203134_1    |
+| Beh Cheng Pin    | 17202872_1    |
+| Low Jun Jie      | 17207035_1    |
+| Chong Zheng Shin | 17206914_1    |
+
+
+
 ## Learning
 - [Colour Detection using Pandas & OpenCV](https://data-flair.training/blogs/project-in-python-colour-detection/)
 - [OpenCV with Tkinter](https://www.pyimagesearch.com/2016/05/23/opencv-with-tkinter/)
