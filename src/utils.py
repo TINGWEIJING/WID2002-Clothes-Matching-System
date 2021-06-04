@@ -64,18 +64,23 @@ class ImageObject:
     def resize(cls, cv_img, dst_h: int = 100, dst_w: int = 100):
         '''Using NN interpolation to resize'''
 
-        src_H, src_W, channels = cv_img.shape
-        old_size =  cv_img.shape
-        row_ratio, col_ratio, _ = np.array([dst_h, dst_w,3])/np.array(old_size)
+        src_H, src_W, _ = cv_img.shape
+        ratio = 0
+        if(src_H > src_W):
+            ratio = src_H/dst_h
+            dst_w = int(src_W / ratio)
+        else:
+            ratio = src_W/dst_w
+            dst_h = int(src_H / ratio)
         
-        print(row_ratio, col_ratio)
+        row_ratio, col_ratio= np.array([dst_h, dst_w])/np.array([src_H, src_W])
+        
         # row wise interpolation 
         row_idx = (np.ceil(range(1, 1 + int(src_H*row_ratio))/row_ratio) - 1).astype(int)
         # column wise interpolation
         col_idx = (np.ceil(range(1, 1 + int(src_W*col_ratio))/col_ratio) - 1).astype(int)
 
         final_matrix = cv_img[:, col_idx][row_idx, :]
-        print(final_matrix.shape)
         return final_matrix
 
 
