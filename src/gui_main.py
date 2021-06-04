@@ -51,7 +51,7 @@ color_chart_win = None
 
 def open_select_source_image(can_image: tk.Canvas, scroll_frame: tk.Frame):
     filetypes = (
-        ('Image file', '*.jpg;*.png'),
+        ('Image file', '*.jpg;*.jpeg;*.png'),
     )
 
     filename = filedialog.askopenfilename(
